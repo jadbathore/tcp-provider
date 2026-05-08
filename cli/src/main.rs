@@ -16,7 +16,8 @@ fn parse_file_reader(s:&str)-> Result<FileReader, String>
 #[derive(IterableStringifyEnum,Debug,Clone)]
 enum Command {
     AddFile,
-    AddProgram
+    AddProgram,
+    Type
 }
 
 
@@ -39,11 +40,11 @@ async fn main()->Result<(), Box<dyn Error>>
 
                 // let stream = TcpStream::connect("localhost:8080").await?;
                 // let mut ws = accept_async(stream).await?;
-                let (mut write,read) = stream.split();
+                let (mut write,_) = stream.split();
                 let _ = write.send(Message::Text(file.to_string_lossy().to_string())).await;
                 let mut buffers = Vec::new(); 
                 file.flush_data(&mut buffers)?;
-                for buffer in buffers {
+                for buffer in buffers { 
                     let _ = write.send(Message::Binary(buffer.to_vec())).await;
                 } 
                 // let listener = TcpListener::bind("localhost:8080").await.unwrap();
@@ -59,6 +60,11 @@ async fn main()->Result<(), Box<dyn Error>>
         },
         Command::AddProgram => {
 
+        },
+        Command::Type => {
+            if let Some(file) = args.path {
+                dbg!(file.get_strategy());
+            }
         }
     }
     Ok(())
