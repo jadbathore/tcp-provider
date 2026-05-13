@@ -1,9 +1,8 @@
-
 build-cli:
 	cd cli && cargo build --release
 
 run-cli-big:
-	cd cli && cargo run AddFile ../big_4k.exr
+	cd cli && cargo run AddFile ../file/big_4k.exr
 
 run-cli-small:
-	cd cli && cargo run AddFile ../small.txt
+	cd cli && cargo run AddFile ../file/small.txt
