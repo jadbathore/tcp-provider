@@ -78,24 +78,11 @@ fn handle_add_file(write:&mut WriterSender,file_reader:Option<FileReader>)->Resu
 {
     if let Some(file) = file_reader {
         let _ = write.send(Message::Text(file.to_string_lossy().to_string()));
-        let mut buffers = Vec::new();
-        file.flush_data(&mut buffers)?;
-
-        let flag_use:Flag = match buffers.len() {
-            x if x <= 1 =>  Flag::File,
-            _ => Flag::Directory
-        };
-       
-        let _ = write.send(Message::Text(flag_use.into()));
-        
         let size:usize = file.size()?.try_into()?;
-        // let a:usize = size.to_string().try_into;
-
-        // let byte_num = size.to_be_bytes().to_vec();
         let _ = write.send(Message::Text(size.to_string()));
-        for buffer in buffers.iter(){
-            let _ = write.send(Message::Binary(buffer.to_vec()));
-        }
+        file.use_accross_data(|chunck|{
+            write.send(Message::Binary(chunck.to_vec()));
+        })?;
         println!("data sended");
 
         Ok(())
